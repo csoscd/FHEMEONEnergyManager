@@ -11,4 +11,6 @@ powerProduced: The production of the system
 
 powerConsumed: The consumption of the house
 
-powerProduced - powerConsumed - powerOut = to Battery (if > 0, otherwise)
+to Battery = powerProduced - powerConsumed - powerOut (if > 0)
+
+powerConsumed - powerIn
