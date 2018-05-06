@@ -337,17 +337,18 @@ sub EONEnergyManager_GetData_Parse($$$) {
 #			
 #			}
 			
-			readingsBeginUpdate($hash);
-
-			$rv = readingsBulkUpdate($hash, "BATTERY_CHARGE", $batteryCharge);
-			$rv = readingsBulkUpdate($hash, "BATTERY_POWERIN", $batteryPowerIn);
-			$rv = readingsBulkUpdate($hash, "BATTERY_POWEROUT", $batteryPowerOut);
-			$rv = readingsBulkUpdate($hash, "BATTERY_HEALTH", $batteryHealth);
-			$rv = readingsBulkUpdate($hash, "BATTERY_TEMPERATURE", $batteryTemp);
-			$rv = readingsBulkUpdate($hash, "BATTERY_STATE", $batteryState);
-			readingsEndUpdate($hash, 1);
 
 		}
+
+		readingsBeginUpdate($hash);
+
+		$rv = readingsBulkUpdate($hash, "BATTERY_CHARGE", $batteryCharge);
+		$rv = readingsBulkUpdate($hash, "BATTERY_POWERIN", $batteryPowerIn);
+		$rv = readingsBulkUpdate($hash, "BATTERY_POWEROUT", $batteryPowerOut);
+		$rv = readingsBulkUpdate($hash, "BATTERY_HEALTH", $batteryHealth);
+		$rv = readingsBulkUpdate($hash, "BATTERY_TEMPERATURE", $batteryTemp);
+		$rv = readingsBulkUpdate($hash, "BATTERY_STATE", $batteryState);
+		readingsEndUpdate($hash, 1);
 	}
 }
 #
