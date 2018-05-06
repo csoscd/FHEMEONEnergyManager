@@ -224,8 +224,131 @@ sub EONEnergyManager_GetData_Parse($$$) {
 
 	my $rv = 0;
 
-	#my $json = decode_json($data);
+	my $json = decode_json($data);
 
+	if (defined $json->{'result'}->{'items'}) {
+		my $batteryCharge;
+		my $batteryHealth;
+		my $batteryPowerIn;
+		my $batteryPowerOut;
+		my $batteryTemp;
+		my $batteryState;
+	
+	
+		my @items = @{ $json->{'result'}->{'items'} };
+		foreach my $item (@items) {
+			my $guid = $item->{'guid'};
+			if (EONEnergyManager_Begins_With($guid, "urn:solarwatt:myreserve:bc:")) {
+				EONEnergyManager_Log($hash, 5, "Result: ".$item->{'guid'});
+
+				# Ladezustand
+				EONEnergyManager_Log($hash, 5, "Battery-StateOfCharge: ".$item->{'tagValues'}->{'StateOfCharge'}->{'value'});
+				$batteryCharge = $item->{'tagValues'}->{'StateOfCharge'}->{'value'};
+
+				# Healthy-Status
+				EONEnergyManager_Log($hash, 5, "Battery-StateOfHealth: ".$item->{'tagValues'}->{'StateOfHealth'}->{'value'});
+				$batteryHealth = $item->{'tagValues'}->{'StateOfHealth'}->{'value'};
+				
+				# Eingangsleistung in Watt
+				EONEnergyManager_Log($hash, 5, "Battery-PowerACIn: ".$item->{'tagValues'}->{'PowerACIn'}->{'value'});
+				$batteryPowerIn = $item->{'tagValues'}->{'PowerACIn'}->{'value'};
+				
+				# Strom aus Batterie in Watt
+				EONEnergyManager_Log($hash, 5, "Battery-PowerACOut: ".$item->{'tagValues'}->{'PowerACOut'}->{'value'});
+				$batteryPowerOut = $item->{'tagValues'}->{'PowerACOut'}->{'value'};
+				
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-CurrentBatteryIn: ".$item->{'tagValues'}->{'CurrentBatteryIn'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-CurrentBatteryOut: ".$item->{'tagValues'}->{'CurrentBatteryOut'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-WorkACIn: ".$item->{'tagValues'}->{'WorkACIn'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-WorkACOut: ".$item->{'tagValues'}->{'WorkACOut'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-VoltageGRMOut: ".$item->{'tagValues'}->{'VoltageGRMOut'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-VoltageGRMIn: ".$item->{'tagValues'}->{'VoltageGRMIn'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-CurrentGRMOut: ".$item->{'tagValues'}->{'CurrentGRMOut'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-ResistanceBatteryMean: ".$item->{'tagValues'}->{'ResistanceBatteryMean'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-ResistanceBatteryMax: ".$item->{'tagValues'}->{'ResistanceBatteryMax'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-ResistanceBatteryMin: ".$item->{'tagValues'}->{'ResistanceBatteryMin'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-VoltageBatteryCellMax: ".$item->{'tagValues'}->{'VoltageBatteryCellMax'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-VoltageBatteryCellMean: ".$item->{'tagValues'}->{'VoltageBatteryCellMean'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-VoltageBatteryCellMin: ".$item->{'tagValues'}->{'VoltageBatteryCellMin'}->{'value'});
+				# Eingangsleistung ?
+				EONEnergyManager_Log($hash, 5, "Battery-VoltageBatteryString: ".$item->{'tagValues'}->{'VoltageBatteryString'}->{'value'});
+				
+				# Batterietemperatur
+				EONEnergyManager_Log($hash, 5, "Battery-TemperatureBattery: ".$item->{'tagValues'}->{'TemperatureBattery'}->{'value'});
+				$batteryTemp = $item->{'tagValues'}->{'TemperatureBattery'}->{'value'};
+				
+				# StateDevice
+				EONEnergyManager_Log($hash, 5, "Battery-StateDevice: ".$item->{'tagValues'}->{'StateDevice'}->{'value'});
+				$batteryState = $item->{'tagValues'}->{'StateDevice'}->{'value'};
+				
+				# IdFirmware
+				EONEnergyManager_Log($hash, 5, "Battery-IdFirmware: ".$item->{'tagValues'}->{'IdFirmware'}->{'value'});
+			} elsif ($guid eq "ERC04-000005285") {
+			
+			} elsif ($guid eq "52a92c37-40e7-4a5d-8b1e-82ee6bad5661") {
+				# Leistungsmessung (Stromgzaehler)
+				# 52a92c37-40e7-4a5d-8b1e-82ee6bad5661
+			
+			} elsif ($guid eq "urn:forecast:ERC04-000005285") {
+				# Leistungsmessung (Stromgzaehler)
+				# 
+			
+			} elsif (EONEnergyManager_Begins_With($guid, "urn:sunspec:fronius:inverter:")) {
+				# Fronius Wechselrichter
+			} elsif ($guid eq "urn:kiwigrid:location:ERC04-000005285:0xxx") {
+				# DeviceClass: com.kiwigrid.devices.location.Location
+				# Location
+				# WorkProduced = gesamte Produktion
+				# WorkOut = gesamte Einspeisung
+				# WorkIn = gesamter Bezug
+				# WorkBuffered = ?
+				# WorkReleased = ?
+				# WorkConsumed = gesamter Verbauch
+				# WorkConsumedFromStorage = gesamter Verbrauch aus Speicher
+				# WorkConsumedFromGrid = ?
+				# WorkSelfConsumed = ?
+				# WorkOutFromStorage = ?
+				# WorkBufferedFromGrid = ?
+				# WorkBufferedFromProducers = ?
+			} else {
+				my @devices = @{ $item->{'deviceModel'} };
+				foreach my $device (@devices) {
+					EONEnergyManager_Log($hash, 5, "DeviceClass: ".$device->{'deviceClass'});
+				}
+			}
+			
+			
+			
+#			my @tagvalues = @{ $item->{'tagValues'} };
+#			foreach my $tagvalue (@tagvalues) {
+#			
+#			}
+			
+			readingsBeginUpdate($hash);
+
+			$rv = readingsBulkUpdate($hash, "BATTERY_CHARGE", $batteryCharge);
+			$rv = readingsBulkUpdate($hash, "BATTERY_POWERIN", $batteryPowerIn);
+			$rv = readingsBulkUpdate($hash, "BATTERY_POWEROUT", $batteryPowerOut);
+			$rv = readingsBulkUpdate($hash, "BATTERY_HEALTH", $batteryHealth);
+			$rv = readingsBulkUpdate($hash, "BATTERY_TEMPERATURE", $batteryTemp);
+			$rv = readingsBulkUpdate($hash, "BATTERY_STATE", $batteryState);
+			readingsEndUpdate($hash, 1);
+
+		}
+	}
 }
 #
 # end EONEnergyManager_GetData_Parse
@@ -306,6 +429,25 @@ sub EONEnergyManager_ParseHttpResponse($)
 
 
 ###############################################
+# begin EONEnergyManager_Begins_With
+#
+#
+# Helper Function to check if a string begins with a specific suffix
+#
+sub EONEnergyManager_Begins_With
+{
+	if (length($_[0]) >= length($_[1])) {
+    	return substr($_[0], 0, length($_[1])) eq $_[1];
+	} else {
+		return 0;
+	}
+}
+#
+# end EONEnergyManager_Begins_With
+###############################################
+
+
+###############################################
 # begin EONEnergyManager_getInterval
 #
 #
@@ -360,6 +502,13 @@ sub EONEnergyManager_DbLog_splitFn($) {
   $value = $parts[1];
   
   $unit = "";
+
+  $unit = "%" if($reading =~ /BATTERY_CHARGE.*/);;
+  $unit = "W" if($reading =~ /BATTERY_POWERIN.*/);;
+  $unit = "W" if($reading =~ /BATTERY_POWEROUT.*/);;
+  $unit = "%" if($reading =~ /BATTERY_HEALTH.*/);;
+  $unit = "°C" if($reading =~ /BATTERY_TEMPERATURE.*/);;
+  
 #  $unit = $unit_day if($reading =~ /ENERGY_DAY.*/);;
 #  $unit = $unit_current if($reading =~ /ENERGY_CURRENT.*/);;
 #  $unit = $unit_total if($reading =~ /ENERGY_TOTAL.*/);;
