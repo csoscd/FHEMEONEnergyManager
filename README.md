@@ -3,14 +3,11 @@ FHEM Module for Eon EnergyManager (= SolarWatt)
 
 ## Figures delivered by EnergyManager:
 
-powerIn: The power cosumed from the net
+LOC_POWER_BUFFERED_FROM_PRODUCERS: Currently going to battery
 
-powerOut: The power delivered to the net
+LOC_POWER_CONSUMED: Current consumption
 
-powerProduced: The production of the system
+LOC_POWER_PRODUCED: Current production
 
-powerConsumed: The consumption of the house
+LOC_POWER_OUT: Currently going to the net
 
-to Battery = powerProduced - powerConsumed - powerOut (if > 0)
-
-powerConsumed - powerIn
