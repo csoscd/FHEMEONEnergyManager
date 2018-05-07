@@ -23,7 +23,9 @@ LOC_P_OUT: Currently going to the net
 
 LOC_P_IN: Currently consumed from the net
 
-LOC_P_SELF_CONSUMED: Currently self consumed. This includes real consumption as well as loading the battery
+LOC_P_SELF_CONSUMED: Currently self consumed. This includes real consumption as well as loading the battery as well as from the battery
+
+LOC_P_CONSUMED_FROM_STORAGE: Currently consumed from the battery
 
 LOC_W_CONSUMED: Overall consumption
 
