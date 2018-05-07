@@ -493,6 +493,9 @@ sub EONEnergyManager_PerformHttpRequest($$)
 {
     my ($hash, $url, $callname) = @_;
     my $name = $hash->{NAME};
+
+    $hash->{STATE}    = "Receiving data";
+
     my $param = {
                     url        => $url,
                     timeout    => 5,
@@ -521,8 +524,11 @@ sub EONEnergyManager_ParseHttpResponse($)
     my $name = $hash->{NAME};
     my $interval = EONEnergyManager_getInterval($hash);
 
+    $hash->{STATE}    = "Data received";
+
     if($err ne "")                                                                                                      # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
+	$hash->{STATE}    = "Connection error";
         EONEnergyManager_Log($hash, 1, "error while requesting ".$param->{url}." - $err");                                            # Eintrag fürs Log
 	if ($param->{call} eq "DATA") {
 	  #
