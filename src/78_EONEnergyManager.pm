@@ -233,6 +233,45 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		my $batteryPowerOut;
 		my $batteryTemp;
 		my $batteryState;
+		
+		my $smPowerIn;
+		my $smPowerOut;
+		my $smWorkIn;
+		my $smWorkOut;
+
+		my $locWorkConsumedFromStorage;
+		my $locWorkSelfSupplied;
+		my $locWorkProduced;
+		my $locWorkOut;
+		my $locWorkOutFromProducers;
+		my $locWorkIn;
+		my $locWorkBuffered;
+		my $locWorkReleased;
+		my $locWorkBufferedFromProducers;
+		my $locWorkConsumedFromProducers;
+		my $locWorkConsumedFromGrid;
+		my $locWorkSelfConsumed;
+		my $locWorkOutFromStorage;
+		my $locWorkBufferedFromGrid;
+		my $locWorkConsumed;
+
+		my $locPowerConsumedFromGrid;
+		my $locPowerProduced;
+		my $locPowerOut;
+		my $locPowerConsumedFromStorage;
+		my $locPowerBufferedFromProducers;
+		my $locPowerOutFromStorage;
+		my $locPowerSelfSupplied;
+		my $locPowerOutFromProducers;
+		my $locPowerBufferedFromGrid;
+		my $locPowerConsumed;
+		my $locPowerIn;
+		my $locPowerConsumptionForecastNow;
+		my $locPowerProductionForecastNow;					
+		my $locPowerReleased;					
+		my $locPowerConsumedFromProducers;
+		my $locPowerSelfConsumed;
+
 	
 	
 		my @items = @{ $json->{'result'}->{'items'} };
@@ -296,19 +335,19 @@ sub EONEnergyManager_GetData_Parse($$$) {
 				
 				# IdFirmware
 				EONEnergyManager_Log($hash, 5, "Battery-IdFirmware: ".$item->{'tagValues'}->{'IdFirmware'}->{'value'});
-			} elsif ($guid eq "ERC04-000005285") {
+			} elsif ($guid eq "ERC04-000005285_xxx") {
 			
-			} elsif ($guid eq "52a92c37-40e7-4a5d-8b1e-82ee6bad5661") {
+			} elsif ($guid eq "52a92c37-40e7-4a5d-8b1e-82ee6bad5661_xxx") {
 				# Leistungsmessung (Stromgzaehler)
 				# 52a92c37-40e7-4a5d-8b1e-82ee6bad5661
 			
-			} elsif ($guid eq "urn:forecast:ERC04-000005285") {
+			} elsif ($guid eq "urn:forecast:ERC04-000005285_xxx") {
 				# Leistungsmessung (Stromgzaehler)
 				# 
 			
-			} elsif (EONEnergyManager_Begins_With($guid, "urn:sunspec:fronius:inverter:")) {
+			} elsif (EONEnergyManager_Begins_With($guid, "urn:sunspec:fronius:inverter:_xxx")) {
 				# Fronius Wechselrichter
-			} elsif ($guid eq "urn:kiwigrid:location:ERC04-000005285:0xxx") {
+			} elsif ($guid eq "urn:kiwigrid:location:ERC04-000005285:0_xxx") {
 				# DeviceClass: com.kiwigrid.devices.location.Location
 				# Location
 				# WorkProduced = gesamte Produktion
@@ -324,10 +363,60 @@ sub EONEnergyManager_GetData_Parse($$$) {
 				# WorkBufferedFromGrid = ?
 				# WorkBufferedFromProducers = ?
 			} else {
+			        my $isPowerMeter = 0;
+			        my $isLocation = 0;
 				my @devices = @{ $item->{'deviceModel'} };
 				foreach my $device (@devices) {
 					EONEnergyManager_Log($hash, 5, "DeviceClass: ".$device->{'deviceClass'});
+					if ($device->{'deviceClass'} eq "com.kiwigrid.devices.powermeter.PowerMeter") {
+						$isPowerMeter = 1;
+					} elsif ($device->{'deviceClass'} eq "com.kiwigrid.devices.location.Location") {
+					        $isLocation = 1;
+					}
 				}
+				
+				if ($isLocation == 1) {
+					$locWorkConsumedFromStorage = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromStorage'}->{'value'}, "Wh", "kWh");
+					$locWorkSelfSupplied = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkSelfSupplied'}->{'value'}, "Wh", "kWh");
+					$locWorkProduced = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkProduced'}->{'value'}, "Wh", "kWh");
+					$locWorkOut = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOut'}->{'value'}, "Wh", "kWh");
+					$locWorkOutFromProducers = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOutFromProducers'}->{'value'}, "Wh", "kWh");
+					$locWorkIn = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkIn'}->{'value'}, "Wh", "kWh");
+					$locWorkBuffered = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBuffered'}->{'value'}, "Wh", "kWh");
+					$locWorkReleased = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkReleased'}->{'value'}, "Wh", "kWh");
+					$locWorkBufferedFromProducers = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBufferedFromProducers'}->{'value'}, "Wh", "kWh");
+					$locWorkConsumedFromProducers = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromProducers'}->{'value'}, "Wh", "kWh");
+					$locWorkConsumedFromGrid = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromGrid'}->{'value'}, "Wh", "kWh");
+					$locWorkSelfConsumed = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkSelfConsumed'}->{'value'}, "Wh", "kWh");
+					$locWorkOutFromStorage = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOutFromStorage'}->{'value'}, "Wh", "kWh");
+					$locWorkBufferedFromGrid = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBufferedFromGrid'}->{'value'}, "Wh", "kWh");
+					$locWorkConsumed = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumed'}->{'value'}, "Wh", "kWh");
+
+					$locPowerConsumedFromGrid = $item->{'tagValues'}->{'PowerConsumedFromGrid'}->{'value'};
+					$locPowerProduced = $item->{'tagValues'}->{'PowerProduced'}->{'value'};
+					$locPowerOut = $item->{'tagValues'}->{'PowerOut'}->{'value'};
+					$locPowerConsumedFromStorage = $item->{'tagValues'}->{'PowerConsumedFromStorage'}->{'value'};
+					$locPowerBufferedFromProducers = $item->{'tagValues'}->{'PowerBufferedFromProducers'}->{'value'};
+					$locPowerOutFromStorage = $item->{'tagValues'}->{'PowerOutFromStorage'}->{'value'};
+					$locPowerSelfSupplied = $item->{'tagValues'}->{'PowerSelfSupplied'}->{'value'};
+					$locPowerOutFromProducers = $item->{'tagValues'}->{'PowerOutFromProducers'}->{'value'};
+					$locPowerBufferedFromGrid = $item->{'tagValues'}->{'PowerBufferedFromGrid'}->{'value'};
+					$locPowerConsumed = $item->{'tagValues'}->{'PowerConsumed'}->{'value'};
+					$locPowerIn = $item->{'tagValues'}->{'PowerIn'}->{'value'};
+					$locPowerConsumptionForecastNow = $item->{'tagValues'}->{'PowerConsumptionForecastNow'}->{'value'};
+					$locPowerProductionForecastNow = $item->{'tagValues'}->{'PowerProductionForecastNow'}->{'value'};					
+					$locPowerReleased = $item->{'tagValues'}->{'PowerReleased'}->{'value'};					
+					$locPowerConsumedFromProducers = $item->{'tagValues'}->{'PowerConsumedFromProducers'}->{'value'};
+					$locPowerSelfConsumed = $item->{'tagValues'}->{'PowerSelfConsumed'}->{'value'};
+					
+				} elsif ($isPowerMeter == 1) {
+					$smPowerIn = $item->{'tagValues'}->{'PowerIn'}->{'value'};
+					$smPowerOut = $item->{'tagValues'}->{'PowerOut'}->{'value'};
+					$smWorkIn = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkIn'}->{'value'}, "Wh", "kWh");
+					$smWorkOut = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOut'}->{'value'}, "Wh", "kWh");
+					EONEnergyManager_Log($hash, 5, "Reading SmartMeter values: ".$smPowerIn."W, ".$smPowerOut."W, ".$smWorkIn." kWh, ".$smWorkOut." kWh");
+				}
+				
 			}
 			
 			
@@ -348,6 +437,45 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		$rv = readingsBulkUpdate($hash, "BATTERY_HEALTH", $batteryHealth);
 		$rv = readingsBulkUpdate($hash, "BATTERY_TEMPERATURE", $batteryTemp);
 		$rv = readingsBulkUpdate($hash, "BATTERY_STATE", $batteryState);
+		
+		$rv = readingsBulkUpdate($hash, "SMETER_POWER_IN", $smPowerIn);
+		$rv = readingsBulkUpdate($hash, "SMETER_POWER_OUT", $smPowerOut);
+		$rv = readingsBulkUpdate($hash, "SMETER_WORK_IN", $smWorkIn);
+		$rv = readingsBulkUpdate($hash, "SMETER_WORK_OUT", $smWorkOut);
+		
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED_FROM_STORAGE", $locWorkConsumedFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_SELF_SUPPLIED", $locWorkSelfSupplied);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_PRODUCED", $locWorkProduced);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_OUT", $locWorkOut);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_OUT_FROM_PRODUCERS", $locWorkOutFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_IN", $locWorkIn);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_BUFFERED", $locWorkBuffered);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_RELEASED", $locWorkReleased);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_BUFFERED_FROM_PRODUCERS", $locWorkBufferedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED_FROM_PRODUCERS", $locWorkConsumedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED_FROM_GRID", $locWorkConsumedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_SELF_CONSUMED", $locWorkSelfConsumed);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_OUT_FROM_STORAGE", $locWorkOutFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_BUFFERED_FROM_GRID", $locWorkBufferedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED", $locWorkConsumed);
+
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED_FROM_GRID", $locPowerConsumedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_PRODUCED", $locPowerProduced);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_OUT", $locPowerOut);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED_FROM_STORAGE", $locPowerConsumedFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_BUFFERED_FROM_PRODUCERS", $locPowerBufferedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_OUT_FROM_STORAGE", $locPowerOutFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_SELF_SUPPLIED", $locPowerSelfSupplied);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_OUT_FROM_PRODUCERS", $locPowerOutFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_BUFFERED_FROM_GRID", $locPowerBufferedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED", $locPowerConsumed);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_IN", $locPowerIn);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMPTION_FORECAST_NOW", $locPowerConsumptionForecastNow);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_PRODUCTION_FORECAST_NOW", $locPowerProductionForecastNow);					
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_RELEASED", $locPowerReleased);					
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED_FROM_PRODUCERS", $locPowerConsumedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_POWER_SELF_CONSUMED", $locPowerSelfConsumed);
+		
 		readingsEndUpdate($hash, 1);
 	}
 }
@@ -509,6 +637,10 @@ sub EONEnergyManager_DbLog_splitFn($) {
   $unit = "W" if($reading =~ /BATTERY_POWEROUT.*/);;
   $unit = "%" if($reading =~ /BATTERY_HEALTH.*/);;
   $unit = "°C" if($reading =~ /BATTERY_TEMPERATURE.*/);;
+  $unit = "W" if($reading =~ /SMETER_POWER_.*/);;
+  $unit = "kWh" if($reading =~ /SMETER_WORK_.*/);;
+  $unit = "W" if($reading =~ /LOC_POWER_.*/);;
+  $unit = "kWh" if($reading =~ /LOC_WORK_.*/);;
   
 #  $unit = $unit_day if($reading =~ /ENERGY_DAY.*/);;
 #  $unit = $unit_current if($reading =~ /ENERGY_CURRENT.*/);;
