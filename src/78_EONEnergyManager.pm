@@ -428,8 +428,29 @@ sub EONEnergyManager_GetData_Parse($$$) {
 			
 
 		}
+		
+		my $day_start_work_in = EONEnergyManager_GetStartValue($hash, "W_IN", $locWorkIn);
+		my $day_start_work_out = EONEnergyManager_GetStartValue($hash, "W_OUT", $locWorkOut);
+		my $day_start_work_consumed = EONEnergyManager_GetStartValue($hash, "W_CONSUMED", $locWorkConsumed);
+		my $day_start_work_produced = EONEnergyManager_GetStartValue($hash, "W_PRODUCED", $locWorkProduced);
+		my $day_start_work_from_battery = EONEnergyManager_GetStartValue($hash, "W_CONSUMED_FROM_STORAGE", $locWorkConsumedFromStorage);
+		my $day_start_work_to_battery = EONEnergyManager_GetStartValue($hash, "W_BUFFERED", $locWorkBuffered);
+
+		my $day_current_work_in = sprintf("%.4f", $locWorkIn - $day_start_work_in);
+		my $day_current_work_out = sprintf("%.4f", $locWorkOut - $day_start_work_out);
+		my $day_current_work_consumed = sprintf("%.4f", $locWorkConsumed - $day_start_work_consumed);
+		my $day_current_work_produced = sprintf("%.4f", $locWorkProduced - $day_start_work_produced);
+		my $day_current_work_from_battery = sprintf("%.4f", $locWorkConsumedFromStorage - $day_start_work_from_battery);
+		my $day_current_work_to_battery = sprintf("%.4f", $locWorkBuffered - $day_start_work_to_battery);
 
 		readingsBeginUpdate($hash);
+
+		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_IN", $day_current_work_in);
+		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_OUT", $day_current_work_out);
+		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_CONSUMED", $day_current_work_consumed);
+		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_PRODUCED", $day_current_work_produced);		
+		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_FROM_BATTERY", $day_current_work_from_battery);		
+		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_TO_BATTERY", $day_current_work_to_battery);		
 
 		$rv = readingsBulkUpdate($hash, "BATTERY_CHARGE", $batteryCharge);
 		$rv = readingsBulkUpdate($hash, "BATTERY_POWERIN", $batteryPowerIn);
@@ -443,38 +464,38 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		$rv = readingsBulkUpdate($hash, "SMETER_WORK_IN", $smWorkIn);
 		$rv = readingsBulkUpdate($hash, "SMETER_WORK_OUT", $smWorkOut);
 		
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED_FROM_STORAGE", $locWorkConsumedFromStorage);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_SELF_SUPPLIED", $locWorkSelfSupplied);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_PRODUCED", $locWorkProduced);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_OUT", $locWorkOut);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_OUT_FROM_PRODUCERS", $locWorkOutFromProducers);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_IN", $locWorkIn);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_BUFFERED", $locWorkBuffered);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_RELEASED", $locWorkReleased);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_BUFFERED_FROM_PRODUCERS", $locWorkBufferedFromProducers);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED_FROM_PRODUCERS", $locWorkConsumedFromProducers);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED_FROM_GRID", $locWorkConsumedFromGrid);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_SELF_CONSUMED", $locWorkSelfConsumed);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_OUT_FROM_STORAGE", $locWorkOutFromStorage);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_BUFFERED_FROM_GRID", $locWorkBufferedFromGrid);
-		$rv = readingsBulkUpdate($hash, "LOC_WORK_CONSUMED", $locWorkConsumed);
+		$rv = readingsBulkUpdate($hash, "LOC_W_CONSUMED_FROM_STORAGE", $locWorkConsumedFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_W_SELF_SUPPLIED", $locWorkSelfSupplied);
+		$rv = readingsBulkUpdate($hash, "LOC_W_PRODUCED", $locWorkProduced);
+		$rv = readingsBulkUpdate($hash, "LOC_W_OUT", $locWorkOut);
+		$rv = readingsBulkUpdate($hash, "LOC_W_OUT_FROM_PRODUCERS", $locWorkOutFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_W_IN", $locWorkIn);
+		$rv = readingsBulkUpdate($hash, "LOC_W_BUFFERED", $locWorkBuffered);
+		$rv = readingsBulkUpdate($hash, "LOC_W_RELEASED", $locWorkReleased);
+		$rv = readingsBulkUpdate($hash, "LOC_W_BUFFERED_FROM_PRODUCERS", $locWorkBufferedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_W_CONSUMED_FROM_PRODUCERS", $locWorkConsumedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_W_CONSUMED_FROM_GRID", $locWorkConsumedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_W_SELF_CONSUMED", $locWorkSelfConsumed);
+		$rv = readingsBulkUpdate($hash, "LOC_W_OUT_FROM_STORAGE", $locWorkOutFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_W_BUFFERED_FROM_GRID", $locWorkBufferedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_W_CONSUMED", $locWorkConsumed);
 
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED_FROM_GRID", $locPowerConsumedFromGrid);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_PRODUCED", $locPowerProduced);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_OUT", $locPowerOut);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED_FROM_STORAGE", $locPowerConsumedFromStorage);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_BUFFERED_FROM_PRODUCERS", $locPowerBufferedFromProducers);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_OUT_FROM_STORAGE", $locPowerOutFromStorage);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_SELF_SUPPLIED", $locPowerSelfSupplied);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_OUT_FROM_PRODUCERS", $locPowerOutFromProducers);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_BUFFERED_FROM_GRID", $locPowerBufferedFromGrid);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED", $locPowerConsumed);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_IN", $locPowerIn);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMPTION_FORECAST_NOW", $locPowerConsumptionForecastNow);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_PRODUCTION_FORECAST_NOW", $locPowerProductionForecastNow);					
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_RELEASED", $locPowerReleased);					
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_CONSUMED_FROM_PRODUCERS", $locPowerConsumedFromProducers);
-		$rv = readingsBulkUpdate($hash, "LOC_POWER_SELF_CONSUMED", $locPowerSelfConsumed);
+		$rv = readingsBulkUpdate($hash, "LOC_P_CONSUMED_FROM_GRID", $locPowerConsumedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_P_PRODUCED", $locPowerProduced);
+		$rv = readingsBulkUpdate($hash, "LOC_P_OUT", $locPowerOut);
+		$rv = readingsBulkUpdate($hash, "LOC_P_CONSUMED_FROM_STORAGE", $locPowerConsumedFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_P_BUFFERED_FROM_PRODUCERS", $locPowerBufferedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_P_OUT_FROM_STORAGE", $locPowerOutFromStorage);
+		$rv = readingsBulkUpdate($hash, "LOC_P_SELF_SUPPLIED", $locPowerSelfSupplied);
+		$rv = readingsBulkUpdate($hash, "LOC_P_OUT_FROM_PRODUCERS", $locPowerOutFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_P_BUFFERED_FROM_GRID", $locPowerBufferedFromGrid);
+		$rv = readingsBulkUpdate($hash, "LOC_P_CONSUMED", $locPowerConsumed);
+		$rv = readingsBulkUpdate($hash, "LOC_P_IN", $locPowerIn);
+		$rv = readingsBulkUpdate($hash, "LOC_P_CONSUMPTION_FORECAST_NOW", $locPowerConsumptionForecastNow);
+		$rv = readingsBulkUpdate($hash, "LOC_P_PRODUCTION_FORECAST_NOW", $locPowerProductionForecastNow);					
+		$rv = readingsBulkUpdate($hash, "LOC_P_RELEASED", $locPowerReleased);					
+		$rv = readingsBulkUpdate($hash, "LOC_P_CONSUMED_FROM_PRODUCERS", $locPowerConsumedFromProducers);
+		$rv = readingsBulkUpdate($hash, "LOC_P_SELF_CONSUMED", $locPowerSelfConsumed);
 		
 		readingsEndUpdate($hash, 1);
 	}
@@ -482,6 +503,36 @@ sub EONEnergyManager_GetData_Parse($$$) {
 #
 # end EONEnergyManager_GetData_Parse
 ###############################################
+
+###############################################
+# begin EONEnergyManager_GetStartValue
+#
+sub EONEnergyManager_GetStartValue($$) {
+
+    my ($hash, $para, $value) = @_;
+    my $name = $hash->{NAME};
+
+
+    my $paraname = "EM_START_".$para;
+
+    my $value_today_start = ReadingsVal($name, $paraname, "0:unknown");
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+
+    my $tmp_begin_value;
+    my @begin_info = split /:/, $value_today_start;
+
+    if ($begin_info[1] eq $wday) {
+	$tmp_begin_value = $begin_info[0];
+    } else {
+	$tmp_begin_value = $value;
+	readingsSingleUpdate($hash, $paraname, $tmp_begin_value.":".$wday, undef);
+    }
+    return $tmp_begin_value;
+}
+#
+# end EONEnergyManager_GetStartValue
+###############################################
+
 
 ###############################################
 # begin EONEnergyManager_PerformHttpRequest
@@ -645,8 +696,10 @@ sub EONEnergyManager_DbLog_splitFn($) {
   $unit = "°C" if($reading =~ /BATTERY_TEMPERATURE.*/);;
   $unit = "W" if($reading =~ /SMETER_POWER_.*/);;
   $unit = "kWh" if($reading =~ /SMETER_WORK_.*/);;
-  $unit = "W" if($reading =~ /LOC_POWER_.*/);;
-  $unit = "kWh" if($reading =~ /LOC_WORK_.*/);;
+  $unit = "W" if($reading =~ /LOC_P_.*/);;
+  $unit = "kWh" if($reading =~ /LOC_W_.*/);;
+  $unit = "kWh" if($reading =~ /CAL_TODAY_W_.*/);;
+  
   
 #  $unit = $unit_day if($reading =~ /ENERGY_DAY.*/);;
 #  $unit = $unit_current if($reading =~ /ENERGY_CURRENT.*/);;

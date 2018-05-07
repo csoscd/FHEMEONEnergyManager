@@ -11,8 +11,8 @@ set grid
 set ylabel "W"
 set y2label "W"
 
-#myDbLog EnergyManager:LOC_POWER_PRODUCED
-#myDbLog EnergyManager:LOC_POWER_PRODUCTION_FORECAST_NOW
+#myDbLog EnergyManager:LOC_P_PRODUCED
+#myDbLog EnergyManager:LOC_P_PRODUCTION_FORECAST_NOW
 
 plot "<IN>" using 1:2 axes x1y2 title 'Erzeugung' ls l1 lw 1 with lines,\
      "<IN>" using 1:2 axes x1y2 title 'Vorhersage' ls l2fill lw 1 with lines
