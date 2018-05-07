@@ -376,21 +376,21 @@ sub EONEnergyManager_GetData_Parse($$$) {
 				}
 				
 				if ($isLocation == 1) {
-					$locWorkConsumedFromStorage = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromStorage'}->{'value'}, "Wh", "kWh");
-					$locWorkSelfSupplied = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkSelfSupplied'}->{'value'}, "Wh", "kWh");
-					$locWorkProduced = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkProduced'}->{'value'}, "Wh", "kWh");
-					$locWorkOut = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOut'}->{'value'}, "Wh", "kWh");
-					$locWorkOutFromProducers = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOutFromProducers'}->{'value'}, "Wh", "kWh");
-					$locWorkIn = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkIn'}->{'value'}, "Wh", "kWh");
-					$locWorkBuffered = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBuffered'}->{'value'}, "Wh", "kWh");
-					$locWorkReleased = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkReleased'}->{'value'}, "Wh", "kWh");
-					$locWorkBufferedFromProducers = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBufferedFromProducers'}->{'value'}, "Wh", "kWh");
-					$locWorkConsumedFromProducers = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromProducers'}->{'value'}, "Wh", "kWh");
-					$locWorkConsumedFromGrid = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromGrid'}->{'value'}, "Wh", "kWh");
-					$locWorkSelfConsumed = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkSelfConsumed'}->{'value'}, "Wh", "kWh");
-					$locWorkOutFromStorage = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOutFromStorage'}->{'value'}, "Wh", "kWh");
-					$locWorkBufferedFromGrid = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBufferedFromGrid'}->{'value'}, "Wh", "kWh");
-					$locWorkConsumed = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumed'}->{'value'}, "Wh", "kWh");
+					$locWorkConsumedFromStorage = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromStorage'}->{'value'}, "Wh", "kWh"));
+					$locWorkSelfSupplied = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkSelfSupplied'}->{'value'}, "Wh", "kWh"));
+					$locWorkProduced = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkProduced'}->{'value'}, "Wh", "kWh"));
+					$locWorkOut = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOut'}->{'value'}, "Wh", "kWh"));
+					$locWorkOutFromProducers = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOutFromProducers'}->{'value'}, "Wh", "kWh"));
+					$locWorkIn = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkIn'}->{'value'}, "Wh", "kWh"));
+					$locWorkBuffered = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBuffered'}->{'value'}, "Wh", "kWh"));
+					$locWorkReleased = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkReleased'}->{'value'}, "Wh", "kWh"));
+					$locWorkBufferedFromProducers = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBufferedFromProducers'}->{'value'}, "Wh", "kWh"));
+					$locWorkConsumedFromProducers = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromProducers'}->{'value'}, "Wh", "kWh"));
+					$locWorkConsumedFromGrid = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumedFromGrid'}->{'value'}, "Wh", "kWh"));
+					$locWorkSelfConsumed = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkSelfConsumed'}->{'value'}, "Wh", "kWh"));
+					$locWorkOutFromStorage = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOutFromStorage'}->{'value'}, "Wh", "kWh"));
+					$locWorkBufferedFromGrid = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBufferedFromGrid'}->{'value'}, "Wh", "kWh"));
+					$locWorkConsumed = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumed'}->{'value'}, "Wh", "kWh"));
 
 					$locPowerConsumedFromGrid = $item->{'tagValues'}->{'PowerConsumedFromGrid'}->{'value'};
 					$locPowerProduced = $item->{'tagValues'}->{'PowerProduced'}->{'value'};
