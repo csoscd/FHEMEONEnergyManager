@@ -143,6 +143,7 @@ sub EONEnergyManager_Initialize($) {
     . "disable:1,0 "
     . "interval "
     . "interval_night "
+    . "powerperbatterie "
     . $readingFnAttributes
   ;
 }
