@@ -1,0 +1,18 @@
+# Created by FHEM/98_SVG.pm, 2018-05-07 15:26:07
+set terminal png transparent size <SIZE> crop
+set output '<OUT>.png'
+set xdata time
+set timefmt "%Y-%m-%d_%H:%M:%S"
+set xlabel " "
+set title 'Erzeugung'
+set ytics 
+set y2tics 
+set grid
+set ylabel "W"
+set y2label "W"
+
+#myDbLog EnergyManager:LOC_P_PRODUCED
+#myDbLog EnergyManager:LOC_P_PRODUCTION_FORECAST_NOW
+
+plot "<IN>" using 1:2 axes x1y2 title 'Erzeugung' ls l1 lw 1 with lines,\
+     "<IN>" using 1:2 axes x1y2 title 'Vorhersage' ls l2fill lw 1 with lines
