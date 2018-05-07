@@ -15,6 +15,8 @@ use JSON qw( decode_json );
 
 my $MODUL = "EONEnergyManager";
 
+my $batterie_work = 0;
+
 ###############################################
 # Help Function to have a standard logging
 #
@@ -233,6 +235,7 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		my $batteryPowerOut;
 		my $batteryTemp;
 		my $batteryState;
+		my $batteryCount;
 		
 		my $smPowerIn;
 		my $smPowerOut;
@@ -284,6 +287,10 @@ sub EONEnergyManager_GetData_Parse($$$) {
 				EONEnergyManager_Log($hash, 5, "Battery-StateOfCharge: ".$item->{'tagValues'}->{'StateOfCharge'}->{'value'});
 				$batteryCharge = $item->{'tagValues'}->{'StateOfCharge'}->{'value'};
 
+				# Anzahl der Batterien
+				EONEnergyManager_Log($hash, 5, "Battery-CountBatteryModules: ".$item->{'tagValues'}->{'CountBatteryModules'}->{'value'});
+				$batteryCount = $item->{'tagValues'}->{'CountBatteryModules'}->{'value'};
+			
 				# Healthy-Status
 				EONEnergyManager_Log($hash, 5, "Battery-StateOfHealth: ".$item->{'tagValues'}->{'StateOfHealth'}->{'value'});
 				$batteryHealth = $item->{'tagValues'}->{'StateOfHealth'}->{'value'};
@@ -434,6 +441,7 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		my $day_start_work_consumed = EONEnergyManager_GetStartValue($hash, "W_CONSUMED", $locWorkConsumed);
 		my $day_start_work_produced = EONEnergyManager_GetStartValue($hash, "W_PRODUCED", $locWorkProduced);
 		my $day_start_work_from_battery = EONEnergyManager_GetStartValue($hash, "W_CONSUMED_FROM_STORAGE", $locWorkConsumedFromStorage);
+		my $day_start_work_from_producer = EONEnergyManager_GetStartValue($hash, "W_CONSUMED_FROM_PRODUCER", $locWorkConsumedFromProducers);
 		my $day_start_work_to_battery = EONEnergyManager_GetStartValue($hash, "W_BUFFERED", $locWorkBuffered);
 
 		my $day_current_work_in = sprintf("%.4f", $locWorkIn - $day_start_work_in);
@@ -441,15 +449,42 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		my $day_current_work_consumed = sprintf("%.4f", $locWorkConsumed - $day_start_work_consumed);
 		my $day_current_work_produced = sprintf("%.4f", $locWorkProduced - $day_start_work_produced);
 		my $day_current_work_from_battery = sprintf("%.4f", $locWorkConsumedFromStorage - $day_start_work_from_battery);
+		my $day_current_work_from_producer = sprintf("%.4f", $locWorkConsumedFromProducers - $day_start_work_from_producer);
 		my $day_current_work_to_battery = sprintf("%.4f", $locWorkBuffered - $day_start_work_to_battery);
+		
+
+		my $batterie_current_work = $batterie_work * $batteryCount * $batteryCharge / 100;
+		
+		my $batterie_estimation_hours = 0;
+		if ($locPowerConsumed > 0) {
+			$batterie_estimation_hours = sprintf("%.2f", $batterie_current_work / $locPowerConsumed);
+		}
+		
+		my $now_time = timelocal localtime(time);
+		$now_time = $now_time + ($batterie_estimation_hours * 60 * 60);
+		my $batterie_estimated_time = strftime "%d.%m.%Y %H:%M", (localtime $now_time);
+
+		my $autarkie = 100;
+		if ($locWorkConsumed > 0) {
+			$autarkie = sprintf("%.2f", (($locWorkConsumedFromStorage + $locWorkConsumedFromProducers) / $locWorkConsumed * 100));
+		}
+		
+		my $autarkie_today = 100;
+		if ($day_current_work_consumed > 0) {
+			$autarkie_today = sprintf("%.2f", (($day_current_work_from_battery + $day_current_work_from_producer) / $day_current_work_consumed * 100));
+		}
 
 		readingsBeginUpdate($hash);
+
+		$rv = readingsBulkUpdate($hash, "AUTARKIE", $autarkie);
+		$rv = readingsBulkUpdate($hash, "AUTARKIE_TODAY", $autarkie_today);
 
 		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_IN", $day_current_work_in);
 		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_OUT", $day_current_work_out);
 		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_CONSUMED", $day_current_work_consumed);
 		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_PRODUCED", $day_current_work_produced);		
 		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_FROM_BATTERY", $day_current_work_from_battery);		
+		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_FROM_PRODUCER", $day_current_work_from_producer);		
 		$rv = readingsBulkUpdate($hash, "CAL_TODAY_W_TO_BATTERY", $day_current_work_to_battery);		
 
 		$rv = readingsBulkUpdate($hash, "BATTERY_CHARGE", $batteryCharge);
@@ -458,6 +493,9 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		$rv = readingsBulkUpdate($hash, "BATTERY_HEALTH", $batteryHealth);
 		$rv = readingsBulkUpdate($hash, "BATTERY_TEMPERATURE", $batteryTemp);
 		$rv = readingsBulkUpdate($hash, "BATTERY_STATE", $batteryState);
+		$rv = readingsBulkUpdate($hash, "BATTERY_WORK", $batterie_current_work);
+		$rv = readingsBulkUpdate($hash, "BATTERY_ESTIMATED_HOURS", $batterie_estimation_hours);
+		$rv = readingsBulkUpdate($hash, "BATTERY_ESTIMATED_END", $batterie_estimated_time);
 		
 		$rv = readingsBulkUpdate($hash, "SMETER_POWER_IN", $smPowerIn);
 		$rv = readingsBulkUpdate($hash, "SMETER_POWER_OUT", $smPowerOut);
@@ -689,11 +727,13 @@ sub EONEnergyManager_DbLog_splitFn($) {
   
   $unit = "";
 
+  $unit = "%" if($reading =~ /AUTARKIE.*/);;
   $unit = "%" if($reading =~ /BATTERY_CHARGE.*/);;
   $unit = "W" if($reading =~ /BATTERY_POWERIN.*/);;
   $unit = "W" if($reading =~ /BATTERY_POWEROUT.*/);;
   $unit = "%" if($reading =~ /BATTERY_HEALTH.*/);;
   $unit = "°C" if($reading =~ /BATTERY_TEMPERATURE.*/);;
+  $unit = " Wh" if($reading =~ /BATTERY_WORK.*/);;
   $unit = "W" if($reading =~ /SMETER_POWER_.*/);;
   $unit = "kWh" if($reading =~ /SMETER_WORK_.*/);;
   $unit = "W" if($reading =~ /LOC_P_.*/);;
@@ -784,12 +824,13 @@ sub EONEnergyManager_InitAttr($) {
 	EONEnergyManager_Log $hash, 1, "Initialising user setting (attr) for $name";
 	
 	if ($init_done) {
-		if (defined $attr{$name}{unit_day}) {
-#			$unit_day = $attr{$name}{unit_day};
+		if (defined $attr{$name}{powerperbatterie}) {
+			$batterie_work = $attr{$name}{powerperbatterie};
 		} else {
-#			$unit_day = "Wh";
-			EONEnergyManager_Log $hash, 5, "attr unit_day not set, using default";
+			$batterie_work = 2200;
+			EONEnergyManager_Log $hash, 5, "attr powerperbatterie not set, using default (2200)";
 		}
+
 		if (defined $attr{$name}{unit_current}) {
 #			$unit_current = $attr{$name}{unit_current};
 		} else {
