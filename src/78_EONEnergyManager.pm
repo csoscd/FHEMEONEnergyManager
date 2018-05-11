@@ -624,8 +624,8 @@ sub EONEnergyManager_ParseHttpResponse($)
 	  #
 	  # if DATA Call failed, try again in 60 seconds
 	  #
-	  InternalTimer(gettimeofday() + 60, "EONEnergyManager_GetData", $hash, 0);
-	  $hash->{STATE}    = "Connection error getting API info";
+	  # InternalTimer(gettimeofday() + 60, "EONEnergyManager_GetData", $hash, 0);
+	  $hash->{STATE}    = "Connection error getting data";
 	  EONEnergyManager_Log($hash, 1, "DATA call to EnergyManager failed");                                                         # Eintrag fürs Log
 	} else {
 	  EONEnergyManager_Log($hash, 1, "Call to EnergyManager failed for ".$param->{call}. "(".$param->{url}.")");                                                         # Eintrag fürs Log
