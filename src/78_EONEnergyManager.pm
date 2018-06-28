@@ -466,7 +466,6 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		my $day_current_work_from_battery = sprintf("%.4f", $locWorkConsumedFromStorage - $day_start_work_from_battery);
 		my $day_current_work_from_producer = sprintf("%.4f", $locWorkConsumedFromProducers - $day_start_work_from_producer);
 		my $day_current_work_to_battery = sprintf("%.4f", $locWorkBuffered - $day_start_work_to_battery);
-		
 
 		my $batterie_current_work = $batterie_work * $batteryCount * $batteryCharge / 100;
 		
