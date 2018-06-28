@@ -227,7 +227,21 @@ sub EONEnergyManager_GetData_Parse($$$) {
 
 	my $rv = 0;
 
-	my $json = decode_json($data);
+	my $json = "";
+	eval {
+		$json = decode_json($data);
+		1;
+	} or do {
+  		my $e = $@;
+  		EONEnergyManager_Log($hash, 1, "Exception: ".$e);
+  		#
+  		# Create a dummy
+  		#
+		my %rec_hash = ('a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5);
+		$json = encode_json(%rec_hash);
+	};
+
+	
 
 	if (defined $json->{'result'}->{'items'}) {
 		my $batteryCharge;
@@ -400,28 +414,28 @@ sub EONEnergyManager_GetData_Parse($$$) {
 					$locWorkBufferedFromGrid = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkBufferedFromGrid'}->{'value'}, "Wh", "kWh"));
 					$locWorkConsumed = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkConsumed'}->{'value'}, "Wh", "kWh"));
 
-					$locPowerConsumedFromGrid = $item->{'tagValues'}->{'PowerConsumedFromGrid'}->{'value'};
-					$locPowerProduced = $item->{'tagValues'}->{'PowerProduced'}->{'value'};
-					$locPowerOut = $item->{'tagValues'}->{'PowerOut'}->{'value'};
-					$locPowerConsumedFromStorage = $item->{'tagValues'}->{'PowerConsumedFromStorage'}->{'value'};
-					$locPowerBufferedFromProducers = $item->{'tagValues'}->{'PowerBufferedFromProducers'}->{'value'};
-					$locPowerOutFromStorage = $item->{'tagValues'}->{'PowerOutFromStorage'}->{'value'};
-					$locPowerSelfSupplied = $item->{'tagValues'}->{'PowerSelfSupplied'}->{'value'};
-					$locPowerOutFromProducers = $item->{'tagValues'}->{'PowerOutFromProducers'}->{'value'};
-					$locPowerBufferedFromGrid = $item->{'tagValues'}->{'PowerBufferedFromGrid'}->{'value'};
-					$locPowerConsumed = $item->{'tagValues'}->{'PowerConsumed'}->{'value'};
-					$locPowerIn = $item->{'tagValues'}->{'PowerIn'}->{'value'};
-					$locPowerConsumptionForecastNow = $item->{'tagValues'}->{'PowerConsumptionForecastNow'}->{'value'};
-					$locPowerProductionForecastNow = $item->{'tagValues'}->{'PowerProductionForecastNow'}->{'value'};					
-					$locPowerReleased = $item->{'tagValues'}->{'PowerReleased'}->{'value'};					
-					$locPowerConsumedFromProducers = $item->{'tagValues'}->{'PowerConsumedFromProducers'}->{'value'};
-					$locPowerSelfConsumed = $item->{'tagValues'}->{'PowerSelfConsumed'}->{'value'};
+					$locPowerConsumedFromGrid = sprintf("%.4f", $item->{'tagValues'}->{'PowerConsumedFromGrid'}->{'value'});
+					$locPowerProduced = sprintf("%.4f", $item->{'tagValues'}->{'PowerProduced'}->{'value'});
+					$locPowerOut = sprintf("%.4f", $item->{'tagValues'}->{'PowerOut'}->{'value'});
+					$locPowerConsumedFromStorage = sprintf("%.4f", $item->{'tagValues'}->{'PowerConsumedFromStorage'}->{'value'});
+					$locPowerBufferedFromProducers = sprintf("%.4f", $item->{'tagValues'}->{'PowerBufferedFromProducers'}->{'value'});
+					$locPowerOutFromStorage = sprintf("%.4f", $item->{'tagValues'}->{'PowerOutFromStorage'}->{'value'});
+					$locPowerSelfSupplied = sprintf("%.4f", $item->{'tagValues'}->{'PowerSelfSupplied'}->{'value'});
+					$locPowerOutFromProducers = sprintf("%.4f", $item->{'tagValues'}->{'PowerOutFromProducers'}->{'value'});
+					$locPowerBufferedFromGrid = sprintf("%.4f", $item->{'tagValues'}->{'PowerBufferedFromGrid'}->{'value'});
+					$locPowerConsumed = sprintf("%.4f", $item->{'tagValues'}->{'PowerConsumed'}->{'value'});
+					$locPowerIn = sprintf("%.4f", $item->{'tagValues'}->{'PowerIn'}->{'value'});
+					$locPowerConsumptionForecastNow = sprintf("%.4f", $item->{'tagValues'}->{'PowerConsumptionForecastNow'}->{'value'});
+					$locPowerProductionForecastNow = sprintf("%.4f", $item->{'tagValues'}->{'PowerProductionForecastNow'}->{'value'});					
+					$locPowerReleased = sprintf("%.4f", $item->{'tagValues'}->{'PowerReleased'}->{'value'});					
+					$locPowerConsumedFromProducers = sprintf("%.4f", $item->{'tagValues'}->{'PowerConsumedFromProducers'}->{'value'});
+					$locPowerSelfConsumed = sprintf("%.4f", $item->{'tagValues'}->{'PowerSelfConsumed'}->{'value'});
 					
 				} elsif ($isPowerMeter == 1) {
-					$smPowerIn = $item->{'tagValues'}->{'PowerIn'}->{'value'};
-					$smPowerOut = $item->{'tagValues'}->{'PowerOut'}->{'value'};
-					$smWorkIn = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkIn'}->{'value'}, "Wh", "kWh");
-					$smWorkOut = EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOut'}->{'value'}, "Wh", "kWh");
+					$smPowerIn = sprintf("%.4f", $item->{'tagValues'}->{'PowerIn'}->{'value'});
+					$smPowerOut = sprintf("%.4f", $item->{'tagValues'}->{'PowerOut'}->{'value'});
+					$smWorkIn = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkIn'}->{'value'}, "Wh", "kWh"));
+					$smWorkOut = sprintf("%.4f", EONEnergyManager_ConvertData($hash, $item->{'tagValues'}->{'WorkOut'}->{'value'}, "Wh", "kWh"));
 					EONEnergyManager_Log($hash, 5, "Reading SmartMeter values: ".$smPowerIn."W, ".$smPowerOut."W, ".$smWorkIn." kWh, ".$smWorkOut." kWh");
 				}
 				
@@ -452,7 +466,6 @@ sub EONEnergyManager_GetData_Parse($$$) {
 		my $day_current_work_from_battery = sprintf("%.4f", $locWorkConsumedFromStorage - $day_start_work_from_battery);
 		my $day_current_work_from_producer = sprintf("%.4f", $locWorkConsumedFromProducers - $day_start_work_from_producer);
 		my $day_current_work_to_battery = sprintf("%.4f", $locWorkBuffered - $day_start_work_to_battery);
-		
 
 		my $batterie_current_work = $batterie_work * $batteryCount * $batteryCharge / 100;
 		
