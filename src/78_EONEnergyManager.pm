@@ -447,7 +447,7 @@ sub EONEnergyManager_GetData_Parse($$$) {
 #			foreach my $tagvalue (@tagvalues) {
 #			
 #			}
-			
+#			
 
 		}
 		
