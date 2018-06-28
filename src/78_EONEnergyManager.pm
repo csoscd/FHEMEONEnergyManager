@@ -143,6 +143,7 @@ sub EONEnergyManager_Initialize($) {
     . "disable:1,0 "
     . "interval "
     . "interval_night "
+    . "powerperbatterie "
     . $readingFnAttributes
   ;
 }
@@ -623,8 +624,8 @@ sub EONEnergyManager_ParseHttpResponse($)
 	  #
 	  # if DATA Call failed, try again in 60 seconds
 	  #
-	  InternalTimer(gettimeofday() + 60, "EONEnergyManager_GetData", $hash, 0);
-	  $hash->{STATE}    = "Connection error getting API info";
+	  # InternalTimer(gettimeofday() + 60, "EONEnergyManager_GetData", $hash, 0);
+	  $hash->{STATE}    = "Connection error getting data";
 	  EONEnergyManager_Log($hash, 1, "DATA call to EnergyManager failed");                                                         # Eintrag fürs Log
 	} else {
 	  EONEnergyManager_Log($hash, 1, "Call to EnergyManager failed for ".$param->{call}. "(".$param->{url}.")");                                                         # Eintrag fürs Log
@@ -897,15 +898,169 @@ sub EONEnergyManager_UpdateAborted($)
 =pod
 =item [helper|device|command]
 =item summary This module can be used to access data from the E.ON Energy Manager. As the E.ON module should be similar to SOLARWATT Energy Manager it might be used for that as well.
-=item summary_DE Mit diesem Modul kann auf die Daten des E.ON Energy Managers zugegriffen werden. Da das E.ON Modul baugleich mit dem SOLARWATT Energy Manager ist, könnte es genauso dafür funktionieren.
-
+=item summary_DE Mit diesem Modul kann auf die Daten des E.ON Energy Managers zugegriffen werden. Da das E.ON Modul baugleich mit dem SOLARWATT Energy Manager ist, k&ouml;nnte es genauso daf&uuml;r funktionieren.
 =begin html
- Englische Commandref in HTML
+
+<a name="EONEnergyManager"></a>
+<h3>EONEnergyManager</h3>
+<p>This module can be used to access data from the E.ON Energy Manager. As the E.ON module should be similar to SOLARWATT Energy Manager it might be used for that as well.</p>
+
 =end html
 
 =begin html_DE
- Deustche Commandref in HTML
-=end html
+
+<a name="EONEnergyManager"></a>
+<h3>EONEnergyManager</h3>
+<p>Mit diesem Modul kann auf die Daten des E.ON Energy Managers zugegriffen werden. Da das E.ON Modul baugleich mit dem SOLARWATT Energy Manager ist, k&ouml;nnte es genauso daf&uuml;r funktionieren.</p>
+<h4>Definition</h4>
+<p><code>define &lt;name&gt; EONEnergyManager [IPADRESSE[:PORT]]</code></p>
+<h4>Beispiel</h4>
+<p><code>define EnergyManager EONEnergyManager 192.168.10.66</code></p>
+<p>Sollte der Energy Manager nicht auf den Standard Port 80 laufen, kann der Port direkt mit angegeben werden:</p>
+<p><code>define EnergyManager EONEnergyManager 192.168.10.66:81</code></p>
+<h4>Attribute</h4>
+<ul>
+<li><code>interval</code><br/>
+	Abfrageintervall in Sekunden. Default 60 Sekunden, Minimum 10 Sekunden. Wird w&auml;hrend des Tages verwendet. Zum Ermitteln, ob gerade Tag oder Nacht ist, wird die fhem Funktion <a href="https://wiki.fhem.de/wiki/SUNRISE_EL" target="_blank"><code>isday()</code></a> verwendet. <code>isday()</code> ist
+	nach Sonnenaufgang und vor Sonnenuntergang aktiv.
+</li>
+<li><code>interval_night</code><br/>
+	Abfrageintervall in Sekunden w&auml;hrend der Nacht. Default 60 Sekunden, Minimum 10 Sekunden. Damit kann der Abfragezyklus in der Nacht
+	reduziert werden. Zum Ermitteln, ob gerade Tag oder Nacht ist, wird die fhem Funktion <a href="https://wiki.fhem.de/wiki/SUNRISE_EL" target="_blank"><code>isday()</code></a> verwendet. <code>isday()</code> ist
+	nach Sonnenaufgang und vor Sonnenuntergang aktiv.
+</li>
+<li><code>powerperbatterie</code><br/>
+	Leistung einer einzelnen der angeschlossenen Batterien. Default Wert 2200 (Wh). Die Anzahl der angeschlossenen Batterien wird direkt aus dem Energy Manager
+	ausgelesen.
+</li>
+</ul>
+<h4>Readings</h4>
+<ul>
+<li><code>AUTARKIE</code><br/>
+	<em>Berechneter Wert</em> der erreichten Autarkie der Anlage. Ergibt sich aus (<code>LOC_W_CONSUMED_FROM_STORAGE</code> + <code>LOC_W_CONSUMED_FROM_PRODUCERS</code>) / <code>LOC_W_CONSUMED</code> * 100
+</li>
+<li><code>AUTARKIE_TODAY</code><br/>
+	<em>Berechneter Wert</em> der am aktuellen Tag erreichten Autarkie der Anlage. Ergibt sich aus (<code>CAL_TODAY_W_FROM_BATTERY</code> + <code>CAL_TODAY_W_FROM_PRODUCER</code>) / <code>CAL_TODAY_W_CONSUMED</code> * 100
+</li>
+<li><code>BATTERY_CHARGE</code><br/>
+	Ladezustand der Batterie in Prozent.
+</li>
+<li><code>BATTERY_ESTIMATED_END</code><br/>
+	<em>Berechneter Wert</em>, wie lange die Batterie beim aktuellen Verbrauch (<code>LOC_P_CONSUMED</code>) voraussichtlich noch reichen wird.
+</li>
+<li><code>BATTERY_ESTIMATED_HOURS</code><br/>
+	<em>Berechneter Wert</em>. Anzahl der Stunden, bis die Batterie beim aktuellen Verbrauch (<code>LOC_P_CONSUMED</code>) leer sein wird.
+</li>
+<li><code>BATTERY_HEALTH</code><br/>
+	Gesundheitszustand der Batterien in Prozent.
+</li>
+<li><code>BATTERY_POWERIN</code><br/>
+	Aktuelle Ladung der Batterie in Watt. Nur &gt; 0, wenn die Anlage Strom produziert.
+</li>
+<li><code>BATTERY_POWEROUT</code><br/>
+	Aktuelle Entladung der Batterie in Watt. Nur &gt; 0, wenn Strom aus der Batterie bezogen wird.
+</li>
+<li><code>BATTERY_STATE</code><br/>
+	Status der Batterie.
+</li>
+<li><code>BATTERY_TEMPERATURE</code><br/>
+	Temperatur der Batterie.
+</li>
+<li><code>BATTERY_WORK</code><br/>
+	<em>Berechneter Wert</em> der Batterieladung in Wh. Berechnet sich aus Anzahl der installierten Batterien * <code>powerperbatterie</code>.
+</li>
+<li><code>CAL_TODAY_W_CONSUMED</code><br/>
+	<em>Berechneter Wert</em> des Gesamtverbrauchs. Wert des aktuellen Tages in kWh.
+</li>
+<li><code>CAL_TODAY_W_FROM_BATTERY</code><br/>
+	<em>Berechneter Wert</em> des Bezugs aus der Batterie. Wert des aktuellen Tages in kWh.
+</li>
+<li><code>CAL_TODAY_W_FROM_PRODUCER</code><br/>
+	<em>Berechneter Wert</em> des Bezugs direkt aus der Anlage. Wert des aktuellen Tages in kWh.
+</li>
+<li><code>CAL_TODAY_W_IN</code><br/>
+	<em>Berechneter Wert</em> des Bezugs aus dem Stromnetz. Wert des aktuellen Tages in kWh.
+</li>
+<li><code>CAL_TODAY_W_OUT</code><br/>
+	<em>Berechneter Wert</em> der Einspeisung in das Stromnetz. Wert des aktuellen Tages in kWh.
+</li>
+<li><code>CAL_TODAY_W_PRODUCED</code><br/>
+	<em>Berechneter Wert</em> der Produktion der Anlage. Wert des aktuellen Tages in kWh.
+</li>
+<li><code>CAL_TODAY_W_TO_BATTERY</code><br/>
+	<em>Berechneter Wert</em> der Ladung der Batterie. Wert des aktuellen Tages in kWh.
+</li>
+<li><code>EM_START_W_BUFFERED</code><br/>
+	<em>Hilfswert</em> f&uuml;r interne Berechnungen. Wird automatisch beim ersten Aufruf an einem neuen Tag gesetzt.
+</li>
+<li><code>EM_START_W_CONSUMED</code><br/>
+	<em>Hilfswert</em> f&uuml;r interne Berechnungen. Wird automatisch beim ersten Aufruf an einem neuen Tag gesetzt.
+</li>
+<li><code>EM_START_W_CONSUMED_FROM_PRODUCER</code><br/>
+	<em>Hilfswert</em> f&uuml;r interne Berechnungen. Wird automatisch beim ersten Aufruf an einem neuen Tag gesetzt.
+</li>
+<li><code>EM_START_W_CONSUMED_FROM_STORAGE</code><br/>
+	<em>Hilfswert</em> f&uuml;r interne Berechnungen. Wird automatisch beim ersten Aufruf an einem neuen Tag gesetzt.
+</li>
+<li><code>EM_START_W_IN</code><br/>
+	<em>Hilfswert</em> f&uuml;r interne Berechnungen. Wird automatisch beim ersten Aufruf an einem neuen Tag gesetzt.
+</li>
+<li><code>EM_START_W_OUT</code><br/>
+	<em>Hilfswert</em> f&uuml;r interne Berechnungen. Wird automatisch beim ersten Aufruf an einem neuen Tag gesetzt.
+</li>
+<li><code>EM_START_W_PRODUCED</code><br/>
+	<em>Hilfswert</em> f&uuml;r interne Berechnungen. Wird automatisch beim ersten Aufruf an einem neuen Tag gesetzt.
+</li>
+<li><code>LOC_P_BUFFERED_FROM_GRID</code><br/>
+	Unbekannter Wert.
+</li>
+<li><code>LOC_P_BUFFERED_FROM_PRODUCERS</code><br/>
+	Leistung (in Watt), die aktuell zur Batterie geliefert wird.
+</li>
+<li><code>LOC_P_CONSUMED</code><br/>
+	Leistung (in Watt), die aktuell verbraucht wird.
+</li>
+<li><code>LOC_P_CONSUMED_FROM_GRID</code><br/>
+	Unbekannter Wert.
+</li>
+<li><code>LOC_P_CONSUMED_FROM_PRODUCERS</code><br/>
+	Leistung (in Watt), die aktuell aus der Anlage zur Deckung des Eigenbedarf bezogen wird.
+</li>
+<li><code>LOC_P_CONSUMED_FROM_STORAGE</code><br/>
+	Leistung (in Watt), die aktuell aus der Batterie zur Deckung des Eigenbedarf bezogen wird.
+</li>
+<li><code>LOC_P_CONSUMPTION_FORECAST_NOW</code><br/>
+	Vorhersage der Leistung (in Watt), die aktuell verbraucht wird.
+</li>
+<li><code>LOC_P_IN</code><br/>
+	Leistung (in Watt), die aktuell aus dem Netz bezogen wird.
+</li>
+<li><code>LOC_P_OUT</code><br/>
+	Leistung (in Watt), die aktuell in das Netz eingespeist wird.
+</li>
+<li><code>LOC_P_OUT_FROM_PRODUCERS</code><br/>
+	Leistung (in Watt), die aktuell direkt von der Anlage in das Netz eingespeist wird.
+</li>
+<li><code>LOC_P_OUT_FROM_STORAGE</code><br/>
+	Leistung (in Watt), die aktuell aus der Batterie in das Netz eingespeist wird.
+</li>
+<li><code>LOC_P_PRODUCED</code><br/>
+	Leistung (in Watt), die aktuell von der Anlage produziert wird.
+</li>
+<li><code>LOC_P_PRODUCTION_FORECAST_NOW</code><br/>
+	Vorhersage der Leistung (in Watt), die aktuell von der Anlage produziert wird.
+</li>
+<li><code>LOC_P_RELEASED</code><br/>
+	Unbekannter Wert.
+</li>
+<li><code>LOC_P_SELF_CONSUMED</code><br/>
+	Unbekannter Wert.
+</li>
+<li><code>LOC_P_SELF_SUPPLIED</code><br/>
+	Unbekannter Wert.
+</li>
+</ul>
+=end html_DE
 
 # Ende der Commandref
 =cut
